@@ -1,39 +1,14 @@
 {
   "persons": [
     {
-      "name": "Arto Hellas",
-      "number": "040-123456",
-      "id": 1
-    },
-    {
-      "name": "Ada Lovelace",
-      "number": "39-44-5323523",
+      "name": "Petr Perro",
+      "number": "1234567",
       "id": 2
     },
     {
-      "name": "Dan Abramov",
-      "number": "12-43-234345",
-      "id": 3
-    },
-    {
-      "name": "Mary Poppendieck",
-      "number": "39-23-6423122",
-      "id": 4
-    },
-    {
-      "name": "",
-      "number": "",
+      "name": "Max Klishevich",
+      "number": "499999",
       "id": 5
-    },
-    {
-      "name": "Max KLishevich",
-      "number": "495-333-33-33",
-      "id": 6
-    },
-    {
-      "name": "ro mobile",
-      "number": "333-33-33",
-      "id": 7
     }
   ]
 }

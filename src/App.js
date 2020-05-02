@@ -1,27 +1,43 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import Person from "./components/Person";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
+import Notification from "./components/Notification";
+import personsServices from "./services/persons";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [newSearch, setNewSearch] = useState("");
+  const [newMessage, setNewMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((response) => {
+    personsServices.getAll().then((response) => {
       setPersons(response.data);
-      console.log(response);
     });
   }, []);
+
+  const handleCLick = (props) => {
+    if (window.confirm(`Delete ${props.name}?`)) {
+      personsServices
+        .delName(props.id)
+        .then(() => personsServices.getAll())
+        .then((response) => setPersons(response.data));
+    }
+    setNewMessage(`${props.name} deleted`);
+    setTimeout(() => {
+      setNewMessage(null);
+    }, 3000);
+  };
 
   const handlePersonChange = (event) => {
     setNewName(event.target.value);
   };
 
   const handleNumberChange = (event) => {
+    console.log(event.target.value);
     setNewNumber(event.target.value);
   };
 
@@ -30,23 +46,55 @@ const App = () => {
     setNewSearch(newValue);
   };
 
-  const handleUpdate = (noteName) => {
-    axios.post("http://localhost:3001/persons", noteName).then((response) => {
+  const handleUpdate = (noteObj) => {
+    personsServices.create(noteObj).then((response) => {
       setPersons(persons.concat(response.data));
       setNewName("");
       setNewNumber("");
+      setNewMessage(`Added ${noteObj.name}`);
+      setTimeout(() => {
+        setNewMessage(null);
+      }, 3000);
     });
+  };
+
+  const replacePersonsNumber = (replacePers) => {
+    if (
+      window.confirm(
+        `${newName} is already added to phonebook, replace the old number with a new one?`
+      )
+    ) {
+      replacePers.number = newNumber;
+      personsServices
+        .update(replacePers.id, replacePers)
+        .then(() => personsServices.getAll())
+        .then((response) => setPersons(response.data))
+        .catch((error) => {
+          setErrorMessage(
+            `Information of '${newName}' has already been removed from server`
+          );
+          setTimeout(() => {
+            setErrorMessage(null);
+          }, 5000);
+        });
+      setNewName("");
+      setNewNumber("");
+    }
+    setNewMessage(`${newName}'s number updated`);
+    setTimeout(() => {
+      setNewMessage(null);
+    }, 3000);
   };
 
   const addName = (event) => {
     event.preventDefault();
-    const noteName = {
+    const noteObj = {
       name: newName,
       number: newNumber,
     };
     persons.some((el) => el.name === newName)
-      ? alert(`${newName} is already added to phonebook`)
-      : handleUpdate(noteName);
+      ? replacePersonsNumber(persons.find((el) => el.name === newName))
+      : handleUpdate(noteObj);
   };
 
   const filterPerson = persons.filter((elem) => {
@@ -60,6 +108,10 @@ const App = () => {
     <>
       <div>
         <h1>Phonebook</h1>
+
+        <Notification message={newMessage} />
+        <Notification message={errorMessage} />
+
         <Filter value={newSearch} onChange={handleSearchChange} />
 
         <h2>Add a new</h2>
@@ -77,6 +129,7 @@ const App = () => {
               key={person.name}
               person={person.name}
               number={person.number}
+              handleCLick={() => handleCLick(person)}
             />
           ))}
         </ul>
